@@ -5,9 +5,9 @@ This repository hosts an implementation of the Gauss method for orbital determin
 <img
   src="Images/2002_KM6.png"
   alt="Alt text"
-  title="reconstruction of Saturn considering the rotation from several observations"
+  title="Prediction of orbit for asteroid 2002 KM6"
   style="display: block;
-  margin-left: 25%;
-  margin-right: 25%;
-  width: 65%;
+  margin-left: 15%;
+  margin-right: 15%;
+  width: 70%;
   text-align: center;"></center>
