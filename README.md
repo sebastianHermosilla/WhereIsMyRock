@@ -9,5 +9,5 @@ This repository hosts an implementation of the Gauss method for orbital determin
   style="display: block;
   margin-left: 15%;
   margin-right: 15%;
-  width: 70%;
+  width: 90%;
   text-align: center;"></center>
