@@ -57,7 +57,7 @@ def c2(z):
     elif z == 0:
         return 1/2
 
-def losvector(ra_rad, dec_rad):
+def unit_vec(ra, dec):
     """Compute line-of-sight (LOS) vector for given values of right ascension
     and declination. Both angles must be provided in radians.
 
@@ -68,12 +68,12 @@ def losvector(ra_rad, dec_rad):
        Returns:
            1x3 numpy array: cartesian components of LOS vector.
     """
-    cosa_cosd = np.cos(ra_rad)*np.cos(dec_rad)
-    sina_cosd = np.sin(ra_rad)*np.cos(dec_rad)
-    sind = np.sin(dec_rad)
+    cosa_cosd = np.cos(ra)*np.cos(dec)
+    sina_cosd = np.sin(ra)*np.cos(dec)
+    sind = np.sin(dec)
     return np.array((cosa_cosd, sina_cosd, sind))
 
-def lagrangef(mu, r2, tau):
+def f_series(mu, r2, tau):
     """Compute 1st order approximation to Lagrange's f function.
 
        Args:
@@ -86,7 +86,7 @@ def lagrangef(mu, r2, tau):
     """
     return 1.0-0.5*(mu/(r2**3))*(tau**2)
 
-def lagrangeg(mu, r2, tau):
+def g_series(mu, r2, tau):
     """Compute 1st order approximation to Lagrange's g function.
 
        Args:
@@ -126,7 +126,7 @@ def lagrangeg_(tau, xi, z, mu):
     """
     return tau-(xi**3)*c3(z)/np.sqrt(mu)
 
-def gauss_method_get_velocity(r1, r2, r3, t1, t2, t3, r2_star=None):
+def gauss_velocity(r1, r2, r3, t1, t2, t3, r2_star=None):
     """Calculate the velocity vector given the position vectors and 
     the observations times.
 
@@ -151,11 +151,11 @@ def gauss_method_get_velocity(r1, r2, r3, t1, t2, t3, r2_star=None):
     if r2_star == None:
         r2_star = np.linalg.norm(r2)
 
-    f1 = lagrangef(mu, r2_star, tau1)
-    f3 = lagrangef(mu, r2_star, tau3)
+    f1 = f_series(mu, r2_star, tau1)
+    f3 = f_series(mu, r2_star, tau3)
 
-    g1 = lagrangeg(mu, r2_star, tau1)
-    g3 = lagrangeg(mu, r2_star, tau3)
+    g1 = g_series(mu, r2_star, tau1)
+    g3 = g_series(mu, r2_star, tau3)
 
     v2 = (-f3 * r1 + f1 * r3) / (f1 * g3 - f3 * g1)
 
@@ -208,7 +208,7 @@ def univkepler(dt, x, y, z, u, v, w, mu, iters=5, atol=1e-15):
 
     return xi
 
-def gauss_method_core(obs_radec, obs_t, R, mu, r2_root_ind=0):
+def gauss_method(obs_radec, obs_t, R, mu, r2_root_ind=0):
     """Perform core Gauss method.
 
        Args:
@@ -243,9 +243,9 @@ def gauss_method_core(obs_radec, obs_t, R, mu, r2_root_ind=0):
     t3 = obs_t[2]
 
     # compute Line-Of-Sight (LOS) vectors
-    rho1 = losvector(obs_radec[0].ra.rad, obs_radec[0].dec.rad)
-    rho2 = losvector(obs_radec[1].ra.rad, obs_radec[1].dec.rad)
-    rho3 = losvector(obs_radec[2].ra.rad, obs_radec[2].dec.rad)
+    rho1 = unit_vec(obs_radec[0].ra.rad, obs_radec[0].dec.rad)
+    rho2 = unit_vec(obs_radec[1].ra.rad, obs_radec[1].dec.rad)
+    rho3 = unit_vec(obs_radec[2].ra.rad, obs_radec[2].dec.rad)
 
     # compute time differences; make sure time units are consistent!
     tau1 = (t1-t2).jd
@@ -312,13 +312,13 @@ def gauss_method_core(obs_radec, obs_t, R, mu, r2_root_ind=0):
     r2 = R[1]+rho_2_sr*rho2
     r3 = R[2]+rho_3_sr*rho3
 
-    f1 = lagrangef(mu, r2_star, tau1)
-    f3 = lagrangef(mu, r2_star, tau3)
+    f1 = f_series(mu, r2_star, tau1)
+    f3 = f_series(mu, r2_star, tau3)
 
-    g1 = lagrangeg(mu, r2_star, tau1)
-    g3 = lagrangeg(mu, r2_star, tau3)
+    g1 = g_series(mu, r2_star, tau1)
+    g3 = g_series(mu, r2_star, tau3)
 
-    v2 = gauss_method_get_velocity(r1, r2, r3, t1, t2, t3, r2_star=r2_star)
+    v2 = gauss_velocity(r1, r2, r3, t1, t2, t3, r2_star=r2_star)
 
     return r1, r2, r3, v2, D, rho1, rho2, rho3, tau1, tau3, f1, g1, f3, g3, rho_1_sr, rho_2_sr, rho_3_sr
 
